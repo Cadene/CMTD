@@ -32,6 +32,11 @@ public class Vector {
 	public double get(int i){
 		return pis.get(i).doubleValue();
 	}
+	public boolean isGetValid(int i, int k){
+		if(i<0 || i>k)
+			return false;
+		return true;
+	}
 	
 	public void normaliser(){
 		double somme = this.somme();

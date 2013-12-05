@@ -1,6 +1,5 @@
 package CMTD;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class CMTD {
@@ -29,7 +28,9 @@ public class CMTD {
 		this.k = m.getK();
 	}
 	
-	public Vector probaStationnaires(){
+	
+	public Vector probaStationnaires()
+	{
 		Vector v = new Vector();
         v.init(3);
     		
@@ -60,7 +61,6 @@ public class CMTD {
 		//pi(0) :
 		v.set(0,pi0);
 		
-		
 		//pi(1) :
 		if(k>1){
 			v.set(1, v.get(0) * (p/(q*(1-p)) )); 
@@ -68,20 +68,23 @@ public class CMTD {
 		}
 		
 		//pi(2 à k-1) ;
-		for(int i=1; i<k-1; i++)
+		for(int i=1; i<k-2; i++)
 		{
 			v.set( i+1, v.get(i) * (1-q)*p / (1-p)*q );
 			v.normaliser();
 		}
 		
+		v.set(k-1, v.get(k-2) * (1-q)*p / q );
+		
 		//pi(k) ;
-		v.set(k, v.get(k-1) * (1-q)*p/q );
+		v.set(k, v.get(k-1) * (1-q)*p/(-q) );
 		v.normaliser();
 		//v.normaliser();
 		
 		
 		return v;
 	}
+	
 	
 	public Vector methodePuissances(int n)
 	{
@@ -103,24 +106,19 @@ public class CMTD {
 		}
 		else
 		{
-			v.set(0,
-				v.get(0) * m.get(0,0) +
-				v.get(1) * m.get(1,0) 
-			);
+			double somme;
 
-			for(int i=1; i<=k-1; i++)
+			for(int j=0; j<=k; j++)
 			{
-				v.set(i, 
-					v.get(i-1) * m.get(i-1,i) +
-					v.get( i ) * m.get(i,i) +
-					v.get(i+1) * m.get(i+1,i)
-				);
+				somme = 0.0;
+				for(int i=0; i<=k; i++)
+				{
+					if(v.isGetValid(i, k)){
+						somme += v.get(i) * m.get(i,j);
+					}
+				}
+				v.set(j,somme);
 			}
-			
-			v.set(k, 
-				v.get(k-1) * m.get(k-1,k) +
-				v.get(k)   * m.get(k,k)
-			);
 		}
 		
 		return methodePuissancesRec(v,n-1);

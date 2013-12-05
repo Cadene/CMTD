@@ -31,6 +31,9 @@ public class Matrix {
 	}
 	
 	public double get(int i, int j){
+		if(i<0 || j<0){
+			return 0.0;
+		}
 		return tab[i][j];
 	}
 	
