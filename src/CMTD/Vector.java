@@ -1,19 +1,27 @@
 package CMTD;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
+
+import Afficher.Afficher;
 
 public class Vector {
 
 	ArrayList<Double> pis;
+	int n = 0;
 	
 	public Vector(){
 		pis = new ArrayList<Double>();
 	}
+	public Vector(ArrayList<Double> pis){
+		this.pis = pis;
+	}
 	public Vector(int k){
 		pis = new ArrayList<Double>();
 		init(k);
+	}
+	
+	public int size(){
+		return pis.size();
 	}
 
 	public void init(int n){
@@ -29,9 +37,18 @@ public class Vector {
 		pis.set(i, new Double(d));
 	}
 	
+	public void setN(int n){
+		this.n = n;
+	}
+	
+	public int getN(){
+		return n;
+	}
+	
 	public double get(int i){
 		return pis.get(i).doubleValue();
 	}
+	
 	public boolean isGetValid(int i, int k){
 		if(i<0 || i>k)
 			return false;
@@ -61,23 +78,22 @@ public class Vector {
 		return nb/pis.size();
 	}
 	
-	public boolean isConv(double conv)
-	{
-		for(double d : pis){
-			if (d < conv)
-				return true;
-		}
-		return false;
+	
+	@SuppressWarnings("unchecked")
+	public Vector clone(){
+		return new Vector((ArrayList<Double>) pis.clone());
 	}
 	
 	public String toString(){
-		NumberFormat nf = new DecimalFormat("#0.0000");
-		nf.setMinimumFractionDigits(4);
-		String s = "Somme : " + this.somme();
-		s += "\n";
+		String s = "";
+		double somme = somme();
+		if(somme != 1)
+			s+="Somme = " + Afficher.Double(this.somme(),0) + "\n";
+		if(n != 0)
+			s += "NStop = " + this.n + "\n";
 		s += "[  ";
 		for(double d : pis){
-			s+= nf.format(d) + "  ";
+			s+= Afficher.Double(d) + "  ";
 		}
 		s+= "]";
 		s += "\n";

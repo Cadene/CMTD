@@ -1,12 +1,14 @@
 package CMTD;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import Afficher.Afficher;
 
 public class Matrix {
 
 	private double[][] tab;
 	private int k;
+	
+	private double p;
+	private double q;
 	
 	public Matrix(int k){
 		this.k = k;
@@ -16,6 +18,14 @@ public class Matrix {
 	
 	public int getK(){
 		return k;
+	}
+	
+	public double getP(){
+		return p;
+	}
+	
+	public double getQ(){
+		return q;
 	}
 	
 	private void init(){
@@ -30,6 +40,13 @@ public class Matrix {
 		tab[i][j] = d;
 	}
 	
+	public void setP(double p){
+		this.p = p;
+	}
+	public void setQ(double q){
+		this.q = q;
+	}
+	
 	public double get(int i, int j){
 		if(i<0 || j<0){
 			return 0.0;
@@ -38,17 +55,19 @@ public class Matrix {
 	}
 	
 	public String toString(){
-		NumberFormat nf = new DecimalFormat("#0.0000");
-		nf.setMinimumFractionDigits(4);
 		String s = "";
 		for(int i=0; i<=k; i++){
 			s += "[  ";
 			for(int j=0; j<=k; j++){
-				s += nf.format(tab[i][j]) + "  ";
+				s += Afficher.Double(tab[i][j]) + "  ";
 			}
 			s += "]\n";
 		}
 		return s;
+	}
+	
+	public String toInfo(){
+		return "	(k,p,q) : ("+k+","+p+","+q+")\n\n";
 	}
 	
 	

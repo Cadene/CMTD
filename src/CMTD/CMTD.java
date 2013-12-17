@@ -10,6 +10,8 @@ public class CMTD {
 	
 	private Matrix m;
 	
+	private IStrategy strat = new StrategyRand();
+	
 	public CMTD(int k, double p, double q){
 		this.k = k;
 		this.p = p;
@@ -25,14 +27,23 @@ public class CMTD {
 	
 	public CMTD(Matrix m){
 		this.m = m;
+		this.q = m.getQ();
+		this.p = m.getP();
 		this.k = m.getK();
+	}
+	
+	public void setK(int k){
+		this.k = k;
+	}
+	
+	public void setStrat(IStrategy strat){
+		this.strat = strat;
 	}
 	
 	
 	public Vector probaStationnaires()
 	{
-		Vector v = new Vector();
-        v.init(3);
+		Vector v = new Vector(3);
     		
 		v.set(3, ( 1 / (
 			1 + ( q/(p*(1-q)) *
@@ -51,33 +62,31 @@ public class CMTD {
 	}
 	
 
-	public Vector resolutionExacte()
+	public Vector methodeExacte()
 	{
 		Vector v = new Vector(k);
 		Random r = new Random();
 		Double pi0 = new Double( r.nextDouble() );
-		pi0 = new Double(1.0);
+		//pi0 = new Double(1.0);
 		
 		//pi(0) :
 		v.set(0,pi0);
 		
 		//pi(1) :
-		if(k>1){
-			v.set(1, v.get(0) * (p/(q*(1-p)) )); 
-			v.normaliser();
-		}
+		v.set(1, v.get(0) * (p/(q*(1-p)) )); 
+		//v.normaliser();
+		
 		
 		//pi(2 à k-1) ;
-		for(int i=1; i<k-2; i++)
+		for(int i=1; i<k-1; i++)
 		{
-			v.set( i+1, v.get(i) * (1-q)*p / (1-p)*q );
-			v.normaliser();
+			v.set( i+1, v.get(i) * (1-q)*p / ((1-p)*q) );
+			//v.normaliser();
 		}
 		
-		v.set(k-1, v.get(k-2) * (1-q)*p / q );
 		
 		//pi(k) ;
-		v.set(k, v.get(k-1) * (1-q)*p/(-q) );
+		v.set(k, v.get(k-1) * (1-q)*p/q );
 		v.normaliser();
 		//v.normaliser();
 		
@@ -85,27 +94,57 @@ public class CMTD {
 		return v;
 	}
 	
+	public Vector methodeExacteDrap()
+	{
+		Vector v = new Vector(k);
+		Random r = new Random();
+		Double pi0 = new Double( r.nextDouble() );
+		//pi0 = new Double(1.0);
+		
+		//pi(0) :
+		v.set(0,pi0);
+		
+		//pi(1 à k) ;
+		for(int i=1; i<=k; i++)
+		{
+			v.set( i, v.get(i-1) * p*(1-q) / (1-(1-p)*(1-q)) );
+		}
+		
+		v.normaliser();
+		
+		
+		return v;
+	}
 	
-	public Vector methodePuissances(int n)
+	
+	public Vector methodePuissances()
 	{
 		Vector v = new Vector();
 		v.init(k, 1/(double)(k+1));
+
+		Vector vOld = new Vector(k);
 		
-		v = methodePuissancesRec(v,n);
+		v = methodePuissancesRec(v,vOld,0);
 		
 		v.normaliser();
 		
 		return v;
 	}
 
-	private Vector methodePuissancesRec(Vector v, int n)
+	private Vector methodePuissancesRec(Vector v, Vector vOld, int n)
 	{
-		if (v.isConv(0.00005) || (n <= 0))
+		if(strat instanceof StrategyNMax){
+			((StrategyNMax) strat).setN(n);
+		}
+		if (strat.isConv(v,vOld))
 		{ 
+			v.setN(n);
 			return v;
 		}
 		else
 		{
+			vOld = v.clone();
+			
 			double somme;
 
 			for(int j=0; j<=k; j++)
@@ -119,32 +158,40 @@ public class CMTD {
 				}
 				v.set(j,somme);
 			}
+			
+			v.normaliser();
 		}
-		
-		return methodePuissancesRec(v,n-1);
+
+		return methodePuissancesRec(v,vOld,n+1);
 	}
 	
-	
-	public Vector methodeGauss(int n)
+	public Vector methodeGauss()
 	{
 		Vector v = new Vector();
 		v.init(k, 1/(double)(k+1));
+		Vector vOld = new Vector(k);
 		
-		v = methodeGaussRec(v,n);
+		v = methodeGaussRec(v,vOld,0);
 		
 		return v;
 	}
 	
-	private Vector methodeGaussRec(Vector v, int n)
+	private Vector methodeGaussRec(Vector v, Vector vOld, int n)
 	{
-		if (v.isConv(0.00005) || (n <= 0))
+		if(strat instanceof StrategyNMax){
+			((StrategyNMax) strat).setN(n);
+		}
+		if (strat.isConv(v,vOld))
 		{ 
+			v.setN(n);
 			return v;
 		}
 		else
 		{
 			double sommeij;
 			double sommeji;
+			
+			vOld = v.clone();
 			
 			for(int j=0; j<=k; j++)
 			{	
@@ -164,8 +211,13 @@ public class CMTD {
 			v.normaliser();
 		}
 		
-		return methodeGaussRec(v, n-1);
+		return methodeGaussRec(v,vOld,n+1);
 	}
 
-
+	public String toString(){
+		String s = "CMTD :\n";
+		s+= "(k,p,q) : " + k + ", " + p + ", " + q + "\n";
+		return s;
+	}
+	
 }
